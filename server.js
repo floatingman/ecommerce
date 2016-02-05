@@ -14,6 +14,8 @@ var secret = require('./config/secret');
 var User = require('./models/user');
 var Category = require('./models/category');
 
+var cartLength = require('./middleware/middleware');
+
 var app = express();
 
 mongoose.connect(secret.database, function(err){
@@ -44,6 +46,8 @@ app.use(function(req, res, next){
   next();
 });
 
+app.use(cartLength);
+
 app.use(function(req, res, next){
   Category.find({}, function(err, categories){
     if(err) return next(err);
@@ -51,6 +55,7 @@ app.use(function(req, res, next){
     next();
   });
 });
+
 
 app.engine('ejs', engine);
 app.set('view engine', 'ejs');
