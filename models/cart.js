@@ -12,6 +12,3 @@ var CartSchema = new Schema({
 });
 
 module.exports = mongoose.model('Cart', CartSchema);
-
-56b3b9a95162124424ec2d16
-56b3b9a95162124424ec2d16
