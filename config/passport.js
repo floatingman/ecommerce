@@ -4,13 +4,16 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 var secret = require('../config/secret');
 var User = require('../models/user');
 
+var async = require('async');
+var Cart = require('../models/cart');
+
 // serialize and deserialize
 passport.serializeUser(function(user, done){
-  done(null, user._id);
+    done(null, user._id);
 });
 
 passport.deserializeUser(function(id, done){
-  User.findById(id, function(err, user){
+    User.findById(id, function(err, user){
     done(err, user);
   });
 });
@@ -43,18 +46,30 @@ passport.use(new FacebookStrategy(secret.facebook, function(token, refreshToken,
         if (user) {
             return done(null, user);
         } else {
-            var newUser = new User();
-            newUser.email = profile._json.email;
-            newUser.facebook = profile.id;
-            newUser.tokens.push({kind: 'facebook', token: token});
-            newUser.profile.name = profile.displayName;
-            newUser.profile.picture = 'https://graph.facebook.com/' + profile.id + '/picture?type=large';
+            async.waterfall([
+                function(callback){
+                    var newUser = new User();
+                    newUser.email = profile._json.email;
+                    newUser.facebook = profile.id;
+                    newUser.tokens.push({kind: 'facebook', token: token});
+                    newUser.profile.name = profile.displayName;
+                    newUser.profile.picture = 'https://graph.facebook.com/' + profile.id + '/picture?type=large';
 
-            newUser.save(function(err){
-                if (err) throw err;
+                    newUser.save(function(err){
+                        if (err) throw err;
 
-                return done(null, newUser);
-            });
+                        callback(err, newUser._id);
+                    });
+                },
+                function(newUser){
+                    var cart = new Cart();
+                    cart.owner = newUser._id;
+                    cart.save(function(err){
+                        if (err) return done(err);
+                        return done(err, newUser);
+                    });
+                }
+            ]);
         }
     });
 }));
