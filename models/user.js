@@ -5,20 +5,23 @@ var Schema = mongoose.Schema;
 
 /* The user schema attributes / characteristics / fields */
 var UserSchema = new Schema({
-  email: {type: String, unique: true, lowercase: true},
-  password: String,
+    email: {type: String, unique: true, lowercase: true},
+    password: String,
 
-  profile: {
-    name: { type: String, default: ''},
-    picture: { type: String, default: ''}
-  },
+    facebook: String,
+    tokens: Array,
+    
+    profile: {
+        name: { type: String, default: ''},
+        picture: { type: String, default: ''}
+    },
 
-  address: String,
+    address: String,
 
-  history: [{
-    paid: { type: Number, default: 0},
-    item: { type: Schema.Types.ObjectId, ref: 'Product'}
-  }]
+    history: [{
+        paid: { type: Number, default: 0},
+        item: { type: Schema.Types.ObjectId, ref: 'Product'}
+    }]
 });
 
 
